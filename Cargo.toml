@@ -1,0 +1,14 @@
+[package]
+name = "delete-artifacts"
+version = "0.1.0"
+edition = "2021"
+authors = ["Logan Saso <logansaso+tech@gmail.com>"]
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+
+[dependencies]
+clap = { version = "3", features = ["derive"] }
+walkdir = "2"
+tempfile = "3.8.1"
+tempdir = { version = "0.3.7", features = [] }
