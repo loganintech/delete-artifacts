@@ -33,24 +33,36 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 fn do_delete(args: Args) -> Result<(), Box<dyn std::error::Error>> {
     let dirs_to_delete: HashSet<&'static str> = HashSet::from(DIRS_TO_DELETE);
     let mut deleted_dirs: Vec<PathBuf> = Vec::new();
+    // .filter_entry(|e| !(e.file_type().is_dir() && dirs_to_delete.contains(e.file_name().to_str().unwrap().trim())))
 
-    for entry in WalkDir::new(&args.start_dir)
-        .into_iter()
-        .filter_map(|e| e.ok())
-        .filter(|e| e.file_type().is_dir())
-    {
-        if dirs_to_delete.contains(&entry.file_name().to_str().unwrap()) {
-            let dir_path = entry.path();
+    let mut walker = WalkDir::new(&args.start_dir)
+        .into_iter();
 
-            if args.commit {
-                println!("Deleting {}", dir_path.display());
-                if let Err(e) = fs::remove_dir_all(dir_path) {
-                    eprintln!("Error deleting directory: {}", e);
-                } else {
-                    deleted_dirs.push(dir_path.to_path_buf());
+    loop {
+        match walker.next() {
+            Some(Ok(entry)) => {
+                if !(entry.file_type().is_dir() && dirs_to_delete.contains(entry.file_name().to_str().unwrap())) {
+                    continue;
                 }
-            } else {
-                println!("Would delete {}", dir_path.display());
+                let dir_path = entry.path();
+
+                if args.commit {
+                    println!("Deleting {}", dir_path.display());
+                    if let Err(e) = fs::remove_dir_all(dir_path) {
+                        eprintln!("Error deleting directory: {}", e);
+                    } else {
+                        deleted_dirs.push(dir_path.to_path_buf());
+                    }
+                } else {
+                    println!("Would delete {}", dir_path.display());
+                }
+                walker.skip_current_dir();
+            }
+            Some(Err(e)) => {
+                eprintln!("Error: {}", e);
+            }
+            None => {
+                break;
             }
         }
     }

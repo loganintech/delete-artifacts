@@ -9,6 +9,4 @@ authors = ["Logan Saso <logansaso+tech@gmail.com>"]
 
 [dependencies]
 clap = { version = "3", features = ["derive"] }
-walkdir = "2"
-tempfile = "3.8.1"
-tempdir = { version = "0.3.7", features = [] }
+walkdir = "2.4.0"
